@@ -799,7 +799,7 @@ __gshared {
     da_dRandSetSeed dRandSetSeed;
     da_dRandInt dRandInt;
     da_dRandReal dRandReal;
-    da_dPrintMatrix dPrintMatrix;
+    //da_dPrintMatrix dPrintMatrix;
     da_dMakeRandomVector dMakeRandomVector;
     da_dMakeRandomMatrix dMakeRandomMatrix;
     da_dClearUpperTriangle dClearUpperTriangle;
