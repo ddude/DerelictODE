@@ -37,19 +37,19 @@ private {
     import derelict.util.system;
 
     static if( Derelict_OS_Windows ) {
-        version( DerelictODE_DoublePrecision )
+        static if( dDOUBLE )
             enum libNames = "ode_double.dll,ode_doubled.dll,ode.dll";
         else
             enum libNames = "ode_single.dll,ode_singled.dll,ode.dll";
     }
     else static if( Derelict_OS_Mac ) {
-        version( DerelictODE_DoublePrecision )
+        static if( dDOUBLE )
             enum libNames = "libode_double.dylib,libode_doubled.dylib,libode.dylib";
         else
             enum libNames = "libode_single.dylib,libode_singled.dylib,libode.dylib";
     }
     else static if( Derelict_OS_Posix ) {
-        version( DerelictODE_DoublePrecision )
+        static if( dDOUBLE )
             enum libNames = "libode_double.so,libode_doubled.so,libode.so,libode.so.3";
         else
             enum libNames = "libode_single.so,libode_singled.so,libode.so,libode.so.3";
@@ -136,17 +136,12 @@ class DerelictODELoader : SharedLibLoader {
         bindFunc( cast( void** )&dGeomRayGetLength, "dGeomRayGetLength" );
         bindFunc( cast( void** )&dGeomRaySet, "dGeomRaySet" );
         bindFunc( cast( void** )&dGeomRayGet, "dGeomRayGet" );
-        bindFunc( cast( void** )&dGeomRaySetParams, "dGeomRaySetParams" );
-        bindFunc( cast( void** )&dGeomRayGetParams, "dGeomRayGetParams" );
+        bindFunc( cast( void** )&dGeomRaySetFirstContact, "dGeomRaySetFirstContact" );
+        bindFunc( cast( void** )&dGeomRayGetFirstContact, "dGeomRayGetFirstContact" );
+        bindFunc( cast( void** )&dGeomRaySetBackfaceCull, "dGeomRaySetBackfaceCull" );
+        bindFunc( cast( void** )&dGeomRayGetBackfaceCull, "dGeomRayGetBackfaceCull" );
         bindFunc( cast( void** )&dGeomRaySetClosestHit, "dGeomRaySetClosestHit" );
         bindFunc( cast( void** )&dGeomRayGetClosestHit, "dGeomRayGetClosestHit" );
-        bindFunc( cast( void** )&dCreateGeomTransform, "dCreateGeomTransform" );
-        bindFunc( cast( void** )&dGeomTransformSetGeom, "dGeomTransformSetGeom" );
-        bindFunc( cast( void** )&dGeomTransformGetGeom, "dGeomTransformGetGeom" );
-        bindFunc( cast( void** )&dGeomTransformSetCleanup, "dGeomTransformSetCleanup" );
-        bindFunc( cast( void** )&dGeomTransformGetCleanup, "dGeomTransformGetCleanup" );
-        bindFunc( cast( void** )&dGeomTransformSetInfo, "dGeomTransformSetInfo" );
-        bindFunc( cast( void** )&dGeomTransformGetInfo, "dGeomTransformGetInfo" );
         bindFunc( cast( void** )&dCreateHeightfield, "dCreateHeightfield" );
         bindFunc( cast( void** )&dGeomHeightfieldDataCreate, "dGeomHeightfieldDataCreate" );
         bindFunc( cast( void** )&dGeomHeightfieldDataDestroy, "dGeomHeightfieldDataDestroy" );
@@ -161,7 +156,7 @@ class DerelictODELoader : SharedLibLoader {
         bindFunc( cast( void** )&dClosestLineSegmentPoints, "dClosestLineSegmentPoints" );
         bindFunc( cast( void** )&dBoxTouchesBox, "dBoxTouchesBox" );
         bindFunc( cast( void** )&dBoxBox, "dBoxBox" );
-        bindFunc( cast( void** )&dInfiniteAABB, "dInfiniteAABB" );
+        //bindFunc( cast( void** )&dInfiniteAABB, "dInfiniteAABB" );
         bindFunc( cast( void** )&dCreateGeomClass, "dCreateGeomClass" );
         bindFunc( cast( void** )&dGeomGetClassData, "dGeomGetClassData" );
         bindFunc( cast( void** )&dCreateGeom, "dCreateGeom" );
@@ -306,6 +301,8 @@ class DerelictODELoader : SharedLibLoader {
         // objects.h
         bindFunc( cast( void** )&dWorldCreate, "dWorldCreate" );
         bindFunc( cast( void** )&dWorldDestroy, "dWorldDestroy" );
+        bindFunc( cast( void** )&dWorldSetData, "dWorldSetData" );
+        bindFunc( cast( void** )&dWorldGetData, "dWorldGetData" );
         bindFunc( cast( void** )&dWorldSetGravity, "dWorldSetGravity" );
         bindFunc( cast( void** )&dWorldGetGravity, "dWorldGetGravity" );
         bindFunc( cast( void** )&dWorldSetERP, "dWorldSetERP" );
@@ -313,9 +310,12 @@ class DerelictODELoader : SharedLibLoader {
         bindFunc( cast( void** )&dWorldSetCFM, "dWorldSetCFM" );
         bindFunc( cast( void** )&dWorldGetCFM, "dWorldGetCFM" );
         bindFunc( cast( void** )&dWorldUseSharedWorkingMemory, "dWorldUseSharedWorkingMemory" );
+        bindFunc( cast( void** )&dWorldSetStepIslandsProcessingMaxThreadCount, "dWorldSetStepIslandsProcessingMaxThreadCount" );
+        bindFunc( cast( void** )&dWorldGetStepIslandsProcessingMaxThreadCount, "dWorldGetStepIslandsProcessingMaxThreadCount" );
         bindFunc( cast( void** )&dWorldCleanupWorkingMemory, "dWorldCleanupWorkingMemory" );
         bindFunc( cast( void** )&dWorldSetStepMemoryReservationPolicy, "dWorldSetStepMemoryReservationPolicy" );
         bindFunc( cast( void** )&dWorldSetStepMemoryManager, "dWorldSetStepMemoryManager" );
+        bindFunc( cast( void** )&dWorldSetStepThreadingImplementation, "dWorldSetStepThreadingImplementation" );
         bindFunc( cast( void** )&dWorldStep, "dWorldStep" );
         bindFunc( cast( void** )&dWorldImpulseToForce, "dWorldImpulseToForce" );
         bindFunc( cast( void** )&dWorldQuickStep, "dWorldQuickStep" );
@@ -446,6 +446,9 @@ class DerelictODELoader : SharedLibLoader {
         bindFunc( cast( void** )&dJointCreateAMotor, "dJointCreateAMotor" );
         bindFunc( cast( void** )&dJointCreateLMotor, "dJointCreateLMotor" );
         bindFunc( cast( void** )&dJointCreatePlane2D, "dJointCreatePlane2D" );
+        bindFunc( cast( void** )&dJointCreateDBall, "dJointCreateDBall" );
+        bindFunc( cast( void** )&dJointCreateDHinge, "dJointCreateDHinge" );
+        bindFunc( cast( void** )&dJointCreateTransmission, "dJointCreateTransmission" );
         bindFunc( cast( void** )&dJointDestroy, "dJointDestroy" );
         bindFunc( cast( void** )&dJointGroupCreate, "dJointGroupCreate" );
         bindFunc( cast( void** )&dJointGroupDestroy, "dJointGroupDestroy" );
@@ -536,6 +539,7 @@ class DerelictODELoader : SharedLibLoader {
         bindFunc( cast( void** )&dJointGetHinge2Axis2, "dJointGetHinge2Axis2" );
         bindFunc( cast( void** )&dJointGetHinge2Param, "dJointGetHinge2Param" );
         bindFunc( cast( void** )&dJointGetHinge2Angle1, "dJointGetHinge2Angle1" );
+        bindFunc( cast( void** )&dJointGetHinge2Angle2, "dJointGetHinge2Angle2" );
         bindFunc( cast( void** )&dJointGetHinge2Angle1Rate, "dJointGetHinge2Angle1Rate" );
         bindFunc( cast( void** )&dJointGetHinge2Angle2Rate, "dJointGetHinge2Angle2Rate" );
         bindFunc( cast( void** )&dJointGetUniversalAnchor, "dJointGetUniversalAnchor" );
@@ -588,6 +592,48 @@ class DerelictODELoader : SharedLibLoader {
         bindFunc( cast( void** )&dJointGetLMotorAxis, "dJointGetLMotorAxis" );
         bindFunc( cast( void** )&dJointGetLMotorParam, "dJointGetLMotorParam" );
         bindFunc( cast( void** )&dJointGetFixedParam, "dJointGetFixedParam" );
+        bindFunc( cast( void** )&dJointGetTransmissionContactPoint1, "dJointGetTransmissionContactPoint1" );
+        bindFunc( cast( void** )&dJointGetTransmissionContactPoint2, "dJointGetTransmissionContactPoint2" );
+        bindFunc( cast( void** )&dJointSetTransmissionAxis1, "dJointSetTransmissionAxis1" );
+        bindFunc( cast( void** )&dJointGetTransmissionAxis1, "dJointGetTransmissionAxis1" );
+        bindFunc( cast( void** )&dJointSetTransmissionAxis2, "dJointSetTransmissionAxis2" );
+        bindFunc( cast( void** )&dJointGetTransmissionAxis2, "dJointGetTransmissionAxis2" );
+        bindFunc( cast( void** )&dJointSetTransmissionAnchor1, "dJointSetTransmissionAnchor1" );
+        bindFunc( cast( void** )&dJointGetTransmissionAnchor1, "dJointGetTransmissionAnchor1" );
+        bindFunc( cast( void** )&dJointSetTransmissionAnchor2, "dJointSetTransmissionAnchor2" );
+        bindFunc( cast( void** )&dJointGetTransmissionAnchor2, "dJointGetTransmissionAnchor2" );
+        bindFunc( cast( void** )&dJointSetTransmissionParam, "dJointSetTransmissionParam" );
+        bindFunc( cast( void** )&dJointGetTransmissionParam, "dJointGetTransmissionParam" );
+        bindFunc( cast( void** )&dJointSetTransmissionMode, "dJointSetTransmissionMode" );
+        bindFunc( cast( void** )&dJointGetTransmissionMode, "dJointGetTransmissionMode" );
+        bindFunc( cast( void** )&dJointSetTransmissionRatio, "dJointSetTransmissionRatio" );
+        bindFunc( cast( void** )&dJointGetTransmissionRatio, "dJointGetTransmissionRatio" );
+        bindFunc( cast( void** )&dJointSetTransmissionAxis, "dJointSetTransmissionAxis" );
+        bindFunc( cast( void** )&dJointGetTransmissionAxis, "dJointGetTransmissionAxis" );
+        bindFunc( cast( void** )&dJointGetTransmissionAngle1, "dJointGetTransmissionAngle1" );
+        bindFunc( cast( void** )&dJointGetTransmissionAngle2, "dJointGetTransmissionAngle2" );
+        bindFunc( cast( void** )&dJointGetTransmissionRadius1, "dJointGetTransmissionRadius1" );
+        bindFunc( cast( void** )&dJointGetTransmissionRadius2, "dJointGetTransmissionRadius2" );
+        bindFunc( cast( void** )&dJointSetTransmissionRadius1, "dJointSetTransmissionRadius1" );
+        bindFunc( cast( void** )&dJointSetTransmissionRadius2, "dJointSetTransmissionRadius2" );
+        bindFunc( cast( void** )&dJointGetTransmissionBacklash, "dJointGetTransmissionBacklash" );
+        bindFunc( cast( void** )&dJointSetTransmissionBacklash, "dJointSetTransmissionBacklash" );
+        bindFunc( cast( void** )&dJointSetDBallAnchor1, "dJointSetDBallAnchor1" );
+        bindFunc( cast( void** )&dJointSetDBallAnchor2, "dJointSetDBallAnchor2" );
+        bindFunc( cast( void** )&dJointGetDBallAnchor1, "dJointGetDBallAnchor1" );
+        bindFunc( cast( void** )&dJointGetDBallAnchor2, "dJointGetDBallAnchor2" );
+        bindFunc( cast( void** )&dJointGetDBallDistance, "dJointGetDBallDistance" );
+        bindFunc( cast( void** )&dJointSetDBallParam, "dJointSetDBallParam" );
+        bindFunc( cast( void** )&dJointGetDBallParam, "dJointGetDBallParam" );
+        bindFunc( cast( void** )&dJointSetDHingeAxis, "dJointSetDHingeAxis" );
+        bindFunc( cast( void** )&dJointGetDHingeAxis, "dJointGetDHingeAxis" );
+        bindFunc( cast( void** )&dJointSetDHingeAnchor1, "dJointSetDHingeAnchor1" );
+        bindFunc( cast( void** )&dJointSetDHingeAnchor2, "dJointSetDHingeAnchor2" );
+        bindFunc( cast( void** )&dJointGetDHingeAnchor1, "dJointGetDHingeAnchor1" );
+        bindFunc( cast( void** )&dJointGetDHingeAnchor2, "dJointGetDHingeAnchor2" );
+        bindFunc( cast( void** )&dJointGetDHingeDistance, "dJointGetDHingeDistance" );
+        bindFunc( cast( void** )&dJointSetDHingeParam, "dJointSetDHingeParam" );
+        bindFunc( cast( void** )&dJointGetDHingeParam, "dJointGetDHingeParam" );
         bindFunc( cast( void** )&dConnectingJoint, "dConnectingJoint" );
         bindFunc( cast( void** )&dConnectingJointList, "dConnectingJointList" );
         bindFunc( cast( void** )&dAreConnected, "dAreConnected" );
